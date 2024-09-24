@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:shop_zen/data/dao/review_dao.dart';
+import 'package:shop_zen/data/models/review.dart';
+import 'package:shop_zen/screens/add_reviews_screen.dart';
+import 'package:shop_zen/screens/widget/review_item_widget.dart';
 
-class ReviewsScreen extends StatelessWidget {
-  const ReviewsScreen({super.key});
+class ReviewsScreen extends StatefulWidget {
+  final int productId;
+  final String userToken;
+  const ReviewsScreen(
+      {super.key, required this.productId, required this.userToken});
+
+  @override
+  State<ReviewsScreen> createState() => _ReviewsScreenState();
+}
+
+class _ReviewsScreenState extends State<ReviewsScreen> {
+  List<Review> listReViews = [];
+  ReviewDao reviewDao = ReviewDao();
+  Future<void> loadData() async {
+    List<Review> list = await reviewDao.getAllListData(widget.productId);
+    setState(() {
+      listReViews = list;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +43,7 @@ class ReviewsScreen extends StatelessWidget {
             style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
           ),
         ),
+        actions: [],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -29,7 +57,7 @@ class ReviewsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '245 Reviews',
+                      '${listReViews.length} Reviews',
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                     ),
@@ -58,6 +86,14 @@ class ReviewsScreen extends StatelessWidget {
                   ],
                 ),
                 InkWell(
+                  onTap: () => {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddReviewsScreen(
+                                productId: widget.productId,
+                                userToken: widget.userToken)))
+                  },
                   child: Container(
                     width: size.width * 0.35,
                     height: size.width * 0.1,
@@ -87,105 +123,9 @@ class ReviewsScreen extends StatelessWidget {
             ),
             Expanded(
                 child: ListView.builder(
-              itemCount: 10,
+              itemCount: listReViews.length,
               itemBuilder: (context, index) {
-                return Container(
-                  margin: EdgeInsets.only(top: 10),
-                  width: double.infinity,
-                  height: size.height * 0.18,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              ClipOval(
-                                child: Image.network(
-                                  'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-                                  width: 45,
-                                  height: 45,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Ronald Richards',
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  RichText(
-                                      text: TextSpan(children: [
-                                    WidgetSpan(
-                                        child: Icon(
-                                      Icons.timer,
-                                      size: 18,
-                                      color: Colors.grey.withOpacity(0.7),
-                                    )),
-                                    TextSpan(
-                                        text: ' 13 Sep, 2020',
-                                        style: TextStyle(
-                                            color:
-                                                Colors.grey.withOpacity(0.7)))
-                                  ]))
-                                ],
-                              ),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RichText(
-                                  text: const TextSpan(
-                                      text: '4.8',
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black),
-                                      children: [
-                                    TextSpan(
-                                      text: ' rating',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.black),
-                                    )
-                                  ])),
-                              SizedBox(height: 5),
-                              Row(
-                                children: List.generate(5, (index) {
-                                  return Icon(
-                                    size: 15,
-                                    index < 4
-                                        ? Icons.star
-                                        : Icons
-                                            .star_border, // Hiển thị sao đầy hoặc sao trống
-                                    color: Colors.amber,
-                                  );
-                                }),
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                      const Text(
-                        maxLines: 3,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        'Lorem ipsum dolor sit amet take care of me , i dont like you,when you go to viris consectetur adipiscing elit. Pellentesque malesuada eget vitae amet...',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 17,
-                            color: Colors.grey),
-                      )
-                    ],
-                  ),
-                );
+                return ReViewItem(size: size, review: listReViews[index]);
               },
             ))
           ],

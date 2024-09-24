@@ -1,21 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_zen/data/dao/cart_dao.dart';
+import 'package:shop_zen/data/dao/category_dao.dart';
+import 'package:shop_zen/data/dao/product_dao.dart';
+import 'package:shop_zen/data/dao/product_size_dao.dart';
+import 'package:shop_zen/data/dao/user_dao.dart';
+import 'package:shop_zen/data/models/cart.dart';
+import 'package:shop_zen/data/models/category.dart';
+import 'package:shop_zen/data/models/product.dart';
+import 'package:shop_zen/data/models/product_size.dart';
+import 'package:shop_zen/data/models/user.dart';
+import 'package:shop_zen/screens/reviews_screen.dart';
+import 'package:shop_zen/screens/widget/show_message_widget.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({super.key});
+  final Product product;
+
+  const DetailsScreen({super.key, required this.product});
 
   @override
   State<DetailsScreen> createState() => _DetailsScreenState();
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
-  List<String> detailImage = [
-    'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-    'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-    'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-    'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-  ];
+  CategoryDao categoryDao = CategoryDao();
+  ProductSizeDao productSizeDao = ProductSizeDao();
+  UserDao userDao = UserDao();
+  CartDao cartDao = CartDao();
 
-  List<String> sizes = ['S', 'M', 'L', 'XL', '2XL'];
+  Category? category;
+
+  Future<void> foundCategory() async {
+    Category? foundCategory =
+        await categoryDao.getAnCategory(widget.product.categoryId);
+    if (foundCategory != null) {
+      setState(() {
+        category = foundCategory;
+      });
+    } else {
+      print('null');
+    }
+  }
+
+  String userToken = '';
+
+  Future<void> getData(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString(key);
+
+    if (token != null && token.isNotEmpty) {
+      setState(() {
+        userToken = token;
+      });
+    }
+  }
+
+  List<ProductSize> sizes = [];
+
+  Future<void> foundSize() async {
+    List<ProductSize> foundProductSize =
+        await productSizeDao.getAllListData(widget.product.id);
+    if (foundProductSize.isNotEmpty) {
+      setState(() {
+        sizes = foundProductSize;
+        choose = sizes.first;
+      });
+    } else {
+      print('No sizes found');
+    }
+  }
+
+  Future<User?> foundUser(String username) async {
+    User? user = await userDao.findAnUser(username);
+    return user;
+  }
+
+  late ProductSize choose;
+
+  @override
+  void initState() {
+    super.initState();
+    foundSize();
+    foundCategory();
+    getData('userToken');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,27 +99,31 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: NetworkImage(
-                              'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg'))),
+                          fit: BoxFit.scaleDown,
+                          image: NetworkImage(widget.product.imageUrl))),
                   child: Stack(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 20),
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle, color: Colors.white),
-                              child:
-                                  Image.asset('assets/images/icon_menu.png')),
+                          InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 20),
+                                width: 35,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white),
+                                child: Icon(Icons.arrow_back)),
+                          ),
                           Container(
                               margin: EdgeInsets.symmetric(horizontal: 20),
-                              width: 45,
-                              height: 45,
+                              width: 35,
+                              height: 35,
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle, color: Colors.white),
                               child: Image.asset('assets/images/icon_bag.png'))
@@ -69,8 +141,13 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   topLeft: Radius.circular(50),
                                   topRight: Radius.circular(50))),
                           child: Center(
-                            child: Icon(Icons.ac_unit_rounded, size: 25),
-                          ),
+                              child: Text(
+                            category?.name ?? 'Unknown',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white),
+                          )),
                         ),
                       )
                     ],
@@ -78,14 +155,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 ),
               ),
               Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   child: Column(
                     children: [
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Men\'s Printed Pullover Hoodie',
+                            'Product Name',
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
@@ -104,14 +182,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Nike Club Fleece',
+                            widget.product.name.length > 25
+                                ? widget.product.name.substring(0, 25) + '...'
+                                : widget.product.name,
+                            overflow: TextOverflow.visible,
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 25),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
                           ),
                           Text(
-                            '\$120',
+                            '\$ ${widget.product.price}',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 25),
+                                fontWeight: FontWeight.bold, fontSize: 22),
                           )
                         ],
                       ),
@@ -121,7 +204,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         height: size.height * 0.1,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: detailImage.length,
+                          itemCount: 4,
                           itemBuilder: (context, index) {
                             return Container(
                               margin: EdgeInsets.only(right: 10),
@@ -134,8 +217,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                 borderRadius: BorderRadius.circular(
                                     10), // Bo góc cho ảnh (khớp với viền)
                                 child: Image.network(
-                                  detailImage[
-                                      index], // URL hoặc đường dẫn hình ảnh
+                                  widget.product
+                                      .imageUrl, // URL hoặc đường dẫn hình ảnh
                                   fit: BoxFit
                                       .cover, // Để hình ảnh vừa khít với Container
                                 ),
@@ -164,20 +247,29 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: sizes.map((s) {
-                          return Container(
-                            decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(10)),
-                            width: size.width * 0.15,
-                            height: size.width * 0.15,
-                            child: Center(
-                                child: Text(
-                              s,
-                              style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey),
-                            )),
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                choose = s;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(10)),
+                              width: size.width * 0.15,
+                              height: size.width * 0.15,
+                              child: Center(
+                                  child: Text(
+                                s.size,
+                                style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: choose == s
+                                        ? Colors.black
+                                        : Colors.grey),
+                              )),
+                            ),
                           );
                         }).toList(),
                       ),
@@ -191,11 +283,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ),
                       ),
                       Text(
-                        'The Nike Throwback Pullover Hoodie is made from premium French terry fabric that blends a performance feel with Read More..',
+                        textAlign: TextAlign.start,
+                        widget.product.description,
                         softWrap: true,
                         style: TextStyle(fontSize: 15, color: Colors.grey),
                       ),
-                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -204,14 +296,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             style: TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.w600),
                           ),
-                          Text('View All',
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blue))
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ReviewsScreen(
+                                        productId: widget.product.id,
+                                        userToken: userToken),
+                                  ));
+                            },
+                            child: Text('View All',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.blue)),
+                          )
                         ],
                       ),
-                      SizedBox(height: 10),
                       Container(
                         width: double.infinity,
                         height: size.height * 0.18,
@@ -254,7 +356,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   ],
                                 ),
                                 Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     RichText(
                                         text: const TextSpan(
@@ -321,7 +424,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             ],
                           ),
                           Text(
-                            '\$125',
+                            '\$${widget.product.price + 20}',
                             style: TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.w700),
                           )
@@ -337,7 +440,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                   borderRadius: BorderRadius.circular(10.0)),
                               backgroundColor: Color(0xff4A4E69),
                             ),
-                            onPressed: () {},
+                            onPressed: () async {
+                              User user = await foundUser(userToken) as User;
+                              Cart cart = Cart(
+                                  id: 0,
+                                  productId: widget.product.id,
+                                  size: choose.size,
+                                  quantity: 1,
+                                  userId: user.id);
+                              bool isSucess = await cartDao.insertCart(cart);
+                              if (isSucess) {
+                                showMessage(context, "Add successfully");
+                              } else {
+                                showMessage(context, "Failed to add");
+                              }
+                            },
                             child: Text(
                               'Add to cart',
                               style: TextStyle(

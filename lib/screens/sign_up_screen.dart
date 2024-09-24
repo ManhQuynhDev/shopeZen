@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shop_zen/data/dao/user_dao.dart';
+import 'package:shop_zen/data/models/user.dart';
+import 'package:shop_zen/screens/widget/show_message_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   // ignore: non_constant_identifier_names
@@ -23,6 +26,7 @@ class _SignUpState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    UserDao userDao = UserDao();
     return SafeArea(
       child: Scaffold(
         body: SingleChildScrollView(
@@ -143,8 +147,23 @@ class _SignUpState extends State<SignUpScreen> {
                   )),
               SizedBox(height: 10),
               ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {}
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      User user = User(
+                          id: 0,
+                          username: _usernameController.text,
+                          password: _passwordController.text,
+                          email: _emailAddressController.text);
+
+                      bool isSuccessfully = await userDao
+                          .registerUser(user); // await Future<bool>
+
+                      if (isSuccessfully) {
+                        showMessage(context, 'User registered successfully');
+                      } else {
+                        showMessage(context, 'Failed to register user');
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                       fixedSize: Size(107, 48),

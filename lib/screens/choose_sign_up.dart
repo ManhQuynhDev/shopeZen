@@ -15,10 +15,10 @@ class ChooseSignUp extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [ 
+          children: [
             InkWell(
               onTap: () {
-                 Navigator.pop(context);
+                Navigator.pop(context);
               },
               child: Container(
                 alignment: Alignment.topLeft,
@@ -46,11 +46,13 @@ class ChooseSignUp extends StatelessWidget {
               'Get Your Stuffs \nHere !',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
             ),
             ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, LoginScreen.LOGIN_SCREEN);
+                  Navigator.pushNamed(context, SignUpScreen.SIGN_UP_SCREEN);
                 },
                 style: ElevatedButton.styleFrom(
                     fixedSize: Size(191, 48),
@@ -63,7 +65,7 @@ class ChooseSignUp extends StatelessWidget {
                 )),
             InkWell(
               onTap: () {
-                Navigator.pushNamed(context, SignUpScreen.SIGN_UP_SCREEN);
+                Navigator.pushNamed(context, LoginScreen.LOGIN_SCREEN);
               },
               child: RichText(
                   text: const TextSpan(

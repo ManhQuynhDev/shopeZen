@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_zen/data/dao/user_dao.dart';
+import 'package:shop_zen/main.dart';
+import 'package:shop_zen/screens/widget/show_message_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   // ignore: non_constant_identifier_names
@@ -12,11 +16,19 @@ class LoginScreen extends StatefulWidget {
 
 class _SignUpState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+
   bool _isRemember = false;
 
   bool _isShowPass = true;
 
   double imageSize = 0.3;
+
+  UserDao userDao = UserDao();
+
+  Future<void> saveData(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -32,17 +44,22 @@ class _SignUpState extends State<LoginScreen> {
             children: [
               Column(
                 children: [
-                  Container(
-                    alignment: Alignment.topLeft,
-                    width: double.infinity,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey.withOpacity(0.3),
-                      child: const Icon(Icons.chevron_left_outlined),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      alignment: Alignment.topLeft,
+                      width: double.infinity,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey.withOpacity(0.3),
+                        child: const Icon(Icons.chevron_left_outlined),
+                      ),
                     ),
                   ),
                   RichText(
                       textAlign: TextAlign.center,
-                      text: TextSpan(
+                      text: const TextSpan(
                           text: 'WelCome\n',
                           style: TextStyle(
                               fontSize: 30,
@@ -142,7 +159,7 @@ class _SignUpState extends State<LoginScreen> {
                     ],
                   )),
               SizedBox(height: 20),
-              Text.rich(
+              const Text.rich(
                   textAlign: TextAlign.center,
                   TextSpan(
                       text:
@@ -155,11 +172,20 @@ class _SignUpState extends State<LoginScreen> {
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600))
                       ])),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      print('ok');
+                      bool isLoginSucess = await userDao.checkLogin(
+                          _usernameController.text,
+                          _passwordController.text) as bool;
+                      if (isLoginSucess) {
+                        // showMessage(context, 'User login successfully');
+                        saveData('userToken', _usernameController.text);
+                        Navigator.pushNamed(context, NavigatorApp.HOME_SCREEN);
+                      } else {
+                        showMessage(context, 'Failed to login user');
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(

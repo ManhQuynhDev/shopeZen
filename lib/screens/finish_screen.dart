@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop_zen/main.dart';
+import 'package:shop_zen/screens/order_screen.dart';
 
 class FinishScreen extends StatelessWidget {
   const FinishScreen({super.key});
@@ -31,9 +33,7 @@ class FinishScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage("assets/images/finish.png"),
-                        fit: BoxFit
-                            .contain,
-                        
+                        fit: BoxFit.contain,
                       ),
                     ),
                     child: Column(
@@ -55,9 +55,9 @@ class FinishScreen extends StatelessWidget {
                         Text(
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 14 , fontWeight: FontWeight.w500,
-                              color: Colors.grey
-                            ),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey),
                             'Your order has been confirmed, we will send you confirmation email shortly.')
                       ],
                     ),
@@ -68,7 +68,13 @@ class FinishScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NavigatorApp(),
+                              ));
+                        },
                         style: ElevatedButton.styleFrom(
                             fixedSize: Size(size.width * 0.9, 48),
                             backgroundColor: Color(0xffF5F5F5),
@@ -79,7 +85,13 @@ class FinishScreen extends StatelessWidget {
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         )),
                     ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NavigatorApp(),
+                              ));
+                        },
                         style: ElevatedButton.styleFrom(
                             fixedSize: Size(size.width * 0.9, 48),
                             backgroundColor: Color(0xff4A4E69),

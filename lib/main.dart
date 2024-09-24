@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:shop_zen/data/models/cart.dart';
 import 'package:shop_zen/screens/add_address_screen.dart';
 import 'package:shop_zen/screens/add_card_screen.dart';
 import 'package:shop_zen/screens/add_reviews_screen.dart';
 import 'package:shop_zen/screens/cart_screen.dart';
+import 'package:shop_zen/screens/order_screen.dart';
+import 'package:shop_zen/screens/payment_screen.dart';
 import 'package:shop_zen/screens/choose_sign_up.dart';
 import 'package:shop_zen/screens/details_screen.dart';
+import 'package:shop_zen/screens/favorite_screen.dart';
 import 'package:shop_zen/screens/finish_screen.dart';
 import 'package:shop_zen/screens/home_screen.dart';
 import 'package:shop_zen/screens/login_screen.dart';
@@ -28,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/chooseSignUp': (context) => ChooseSignUp(),
         '/signUpScreen': (context) => SignUpScreen(),
         '/loginScreen': (context) => LoginScreen(),
+        '/homeScreen': (context) => NavigatorApp(),
       },
     );
   }
@@ -35,6 +40,8 @@ class MyApp extends StatelessWidget {
 
 class NavigatorApp extends StatefulWidget {
   const NavigatorApp({super.key});
+
+  static String HOME_SCREEN = '/homeScreen';
 
   @override
   State<NavigatorApp> createState() => _NavigatorAppState();
@@ -44,10 +51,10 @@ class _NavigatorAppState extends State<NavigatorApp> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home'),
-    Text('Favorite'),
-    Text('Cart'),
-    Text('Payment'),
+    HomeScreen(),
+    FavoriteScreen(),
+    CartScreen(),
+    OrderScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -64,7 +71,7 @@ class _NavigatorAppState extends State<NavigatorApp> {
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          items: [
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
                 icon: Icon(Icons.favorite), label: 'Favorite'),
@@ -74,7 +81,7 @@ class _NavigatorAppState extends State<NavigatorApp> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.paypal_sharp),
-              label: 'Payment',
+              label: 'Order',
             )
           ],
           type: BottomNavigationBarType.fixed,

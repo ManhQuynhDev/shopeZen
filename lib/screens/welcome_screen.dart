@@ -21,7 +21,7 @@ class WelcomeScreen extends StatelessWidget {
             'assets/images/welcome_image.png',
             width: double.infinity,
             height: 300,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
           InkWell(
             onTap: () {

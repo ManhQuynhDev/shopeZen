@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shop_zen/models/category.dart';
-import 'package:shop_zen/models/product.dart';
+import 'package:shop_zen/data/dao/category_dao.dart';
+import 'package:shop_zen/data/dao/product_dao.dart';
+import 'package:shop_zen/data/models/category.dart';
+import 'package:shop_zen/data/models/product.dart';
+import 'package:shop_zen/screens/details_screen.dart';
+import 'package:shop_zen/screens/widget/category_item.dart';
+import 'package:shop_zen/screens/widget/product_item.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,57 +15,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Category> listCategory = [
-    Category(
-        name: 'Adidas',
-        logo:
-            'https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-adidas-vector-inkythuatso-01-29-09-08-58.jpg'),
-    Category(
-        name: 'Nike',
-        logo:
-            'https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-adidas-vector-inkythuatso-01-29-09-08-58.jpg'),
-    Category(
-        name: 'Fila',
-        logo:
-            'https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-adidas-vector-inkythuatso-01-29-09-08-58.jpg'),
-    Category(
-        name: 'Adidas',
-        logo:
-            'https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-adidas-vector-inkythuatso-01-29-09-08-58.jpg'),
-  ];
+  CategoryDao categoryDao = CategoryDao();
+  ProductDao productDao = ProductDao();
 
-  List<Product> listProduct = [
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp'),
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp'),
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp'),
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp'),
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp'),
-    Product(
-        name: 'Nike Sportswear Club Fleece',
-        price: 99,
-        urlImage:
-            'https://noithatbinhminh.com.vn/wp-content/uploads/2022/08/anh-dep-44.jpg.webp')
-  ];
+  List<Product> listProduct = [];
+
+  List<Category> listCategory = [];
+
+  Future<void> loadData() async {
+    // Tải dữ liệu từ cơ sở dữ liệu và cập nhật trạng thái
+    List<Category> list = await categoryDao.getAllListData();
+    setState(() {
+      listCategory = list;
+    });
+  }
+
+  Future<void> loadDataProduct() async {
+    // Tải dữ liệu từ cơ sở dữ liệu và cập nhật trạng thái
+    List<Product> list = await productDao.getAllListData();
+    setState(() {
+      listProduct = list;
+    });
+  }
+
+  @override
+  void initState() {
+    loadData();
+    loadDataProduct();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,38 +51,51 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: Icon(Icons.menu),
+          actions: [
+            Container(
+                margin: EdgeInsets.only(right: 10),
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.2),
+                    shape: BoxShape.circle),
+                child: Icon(Icons.shopping_bag)),
+          ],
+        ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.withOpacity(0.5)),
-                      child: Image.asset('assets/images/icon_menu.png')),
-                  Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.withOpacity(0.5)),
-                      child: Image.asset('assets/images/icon_bag.png'))
-                ],
-              ),
-              const SizedBox(height: 20), // Tạo khoảng cách giữa các thành phần
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     Container(
+              //         width: 45,
+              //         height: 45,
+              //         decoration: BoxDecoration(
+              //             shape: BoxShape.circle,
+              //             color: Colors.grey.withOpacity(0.2)),
+              //         child: Image.asset('assets/images/icon_menu.png')),
+              //     Container(
+              //         width: 45,
+              //         height: 45,
+              //         decoration: BoxDecoration(
+              //             shape: BoxShape.circle,
+              //             color: Colors.grey.withOpacity(0.2)),
+              //         child: Image.asset('assets/images/icon_bag.png'))
+              //   ],
+              // ),
               SizedBox(
                 width: size.width * 0.3,
                 child: RichText(
                   text: TextSpan(
                     text: 'Hello\n',
                     style: const TextStyle(
-                        fontSize: 30,
+                        fontSize: 35,
                         fontWeight: FontWeight.bold,
                         color: Colors.black),
                     children: [
@@ -127,18 +123,21 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: BorderRadius.circular(10.0))),
                     ),
                   ),
-                  Container(
-                      width: 55,
-                      height: 55,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Color(0xff4A4E69),
-                      ),
-                      child: Center(
-                          child: Icon(
-                        Icons.mic,
-                        color: Colors.white,
-                      )))
+                  InkWell(
+                    onTap: () {},
+                    child: Container(
+                        width: 55,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color(0xff4A4E69),
+                        ),
+                        child: Center(
+                            child: Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                        ))),
+                  )
                 ],
               ),
               SizedBox(height: 20),
@@ -165,39 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: listCategory.length,
                   itemBuilder: (context, index) {
                     Category category = listCategory[index];
-                    return Container(
-                      width: 115,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey.withOpacity(0.3)),
-                      margin: EdgeInsets.only(right: 10),
-                      padding: EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20)),
-                            child: Image.network(
-                              category.logo,
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            category.name,
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w500),
-                          )
-                        ],
-                      ),
-                    );
+                    return CategoryItem(category: category);
                   },
                 ),
               ),
@@ -219,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 20),
               SizedBox(
                   width: double.infinity,
-                  height: size.height * 0.6,
+                  height: size.height * 0.4,
                   child: GridView.builder(
                     itemCount: listProduct.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -228,48 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         childAspectRatio: 0.8 / 1.3),
                     itemBuilder: (BuildContext context, int index) {
                       Product product = listProduct[index];
-                      return Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15.0)),
-                        height: 200,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Expanded(
-                              flex: 75,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                    color: Colors.grey),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 25,
-                              child: Container(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.name,
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black),
-                                    ),
-                                    Text(
-                                      '\$${product.price}',
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.black),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
+                      return ProductItem(product: product);
                     },
                   )),
             ],

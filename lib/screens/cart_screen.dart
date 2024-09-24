@@ -1,349 +1,135 @@
-import 'package:flutter/material.dart';
+import 'dart:math';
 
-class CartScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:shop_zen/data/dao/cart_dao.dart';
+import 'package:shop_zen/data/dao/product_dao.dart';
+import 'package:shop_zen/data/models/cart.dart';
+import 'package:shop_zen/data/models/product.dart';
+import 'package:shop_zen/screens/payment_screen.dart';
+import 'package:shop_zen/screens/widget/cart_item_widget.dart';
+
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  CartDao cartDao = CartDao();
+  List<bool> _checked = [];
+  List<Cart> listCart = [];
+  double totalPrice = 0;
+  ProductDao productDao = ProductDao();
+
+  Future<void> loadData() async {
+    List<Cart> list = await cartDao.getAllListData();
+    setState(() {
+      listCart = list;
+      _checked = List.generate(list.length, (index) => false); // Khởi tạo danh sách checkbox
+    });
+    totalPrices(); // Gọi hàm tính tổng giá trị
+  }
+
+  Future<void> totalPrices() async {
+    double total = 0; // Khởi tạo biến tổng giá trị
+    for (var c in listCart) {
+      Product? product = await productDao.getAnProduct(c.productId);
+      if (product != null) {
+        total += product.price; // Cộng dồn giá trị sản phẩm vào tổng
+      }
+    }
+    setState(() {
+      totalPrice = total; // Cập nhật tổng giá trị vào totalPrice
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData(); // Gọi hàm loadData
+  }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Center(
-            child: Text(
-          'Cart',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        )),
+          child: Text(
+            'Cart',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        padding: EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
               width: double.infinity,
-              height: size.height * 0.35,
+              height: size.height * 0.71,
               child: ListView.builder(
-                itemCount: 4,
+                itemCount: listCart.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    padding: EdgeInsets.all(10.0),
-                    width: double.infinity,
-                    height: 130,
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                      )
-                    ], borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              'https://images2.thanhnien.vn/528068263637045248/2024/1/25/c3c8177f2e6142e8c4885dbff89eb92a-65a11aeea03da880-1706156293184503262817.jpg',
-                              width: 105,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            )),
-                        SizedBox(
-                          width: size.width * 0.5,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Men\'s Tie-Dye T-Shirt Nike Sportswear',
-                                style: TextStyle(
-                                    fontSize: 17, fontWeight: FontWeight.w600),
-                              ),
-                              Text(
-                                '\$45 (-\$4.00 Tax)',
-                                style:
-                                    TextStyle(fontSize: 14, color: Colors.grey),
-                              ),
-                              SizedBox(
-                                width: size.width * 0.25,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: 0.5, color: Colors.grey),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: Center(
-                                          child: Text(
-                                        '-',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
-                                      )),
-                                    ),
-                                    Text(
-                                      '1',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Container(
-                                      width: 30,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              width: 0.5, color: Colors.grey),
-                                          borderRadius:
-                                              BorderRadius.circular(15)),
-                                      child: Center(
-                                          child: Text(
-                                        '+',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
-                                      )),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              border:
-                                  Border.all(width: 0.5, color: Colors.grey),
-                              borderRadius: BorderRadius.circular(15)),
-                          child: Center(
-                              child: Icon(
-                            Icons.delete_outline_outlined,
-                            size: 17,
-                          )),
-                        ),
-                      ],
-                    ),
+                  Cart cart = listCart[index];
+                  return CartItemWidget(
+                    cart: listCart[index],
+                    isChecked: _checked[index],
+                    onCheckedChanged: (value) {
+                      setState(() {
+                        _checked[index] = value!;
+                      });
+                    },
+                    loadData: loadData,
                   );
                 },
               ),
             ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Delivery Address',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 17,
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/map.png',
-                  width: 60,
-                  height: 60,
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10),
-                    alignment: Alignment.topLeft,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Chhatak, Sunamgonj 12/8AB',
-                          style: TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          'Sylhet',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: Color(0xff4A4E69),
-                      border: Border.all(width: 0.5, color: Colors.grey),
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Center(
-                      child: Icon(
-                    Icons.done,
-                    size: 17,
-                    color: Colors.white,
-                  )),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Payment Method',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 17,
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/map.png',
-                  width: 60,
-                  height: 60,
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10),
-                    alignment: Alignment.topLeft,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Visa Classic',
-                          style: TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          '**** 7690',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                      color: Color(0xff4A4E69),
-                      border: Border.all(width: 0.5, color: Colors.grey),
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Center(
-                      child: Icon(
-                    Icons.done,
-                    size: 17,
-                    color: Colors.white,
-                  )),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: Text(
-                'Order Info',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
+            Container(
+              padding: EdgeInsets.all(10),
+              width: size.width,
               height: 90,
-              child: Column(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
                     children: [
                       Text(
-                        'Subtotal',
+                        'Choose All',
                         style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500),
+                            fontSize: 15, fontWeight: FontWeight.w500),
                       ),
-                      Text(
-                        '\$110',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600),
-                      )
+                      Checkbox(value: false, onChanged: (value) {})
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Text(
-                        'Shipping cost',
+                        'Total : $totalPrice',
                         style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500),
+                            fontWeight: FontWeight.w600, fontSize: 15),
                       ),
-                      Text(
-                        '\$10',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600),
-                      )
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              )),
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+                          },
+                          child: Text('Check out now'))
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500),
-                      ),
-                      Text(
-                        '\$120',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  )
                 ],
               ),
             ),
-            SizedBox(height: 15),
-            ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                    fixedSize: Size(size.width * 0.9, 48),
-                    backgroundColor: Color(0xff4A4E69),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6))),
-                child: const Text(
-                  'Checkout',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                )),
           ],
         ),
       ),
-    ));
+    );
   }
 }

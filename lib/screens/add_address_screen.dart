@@ -1,7 +1,69 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
-class AddAddressScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop_zen/data/dao/address_dao.dart';
+import 'package:shop_zen/data/dao/user_dao.dart';
+import 'package:shop_zen/data/models/address.dart';
+import 'package:shop_zen/data/models/user.dart';
+import 'package:shop_zen/screens/widget/show_message_widget.dart';
+
+class AddAddressScreen extends StatefulWidget {
   const AddAddressScreen({super.key});
+
+  @override
+  State<AddAddressScreen> createState() => _AddAddressScreenState();
+}
+
+class _AddAddressScreenState extends State<AddAddressScreen> {
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _countryController = TextEditingController();
+  TextEditingController _cityController = TextEditingController();
+  TextEditingController _phoneNumberController = TextEditingController();
+  TextEditingController _addressController = TextEditingController();
+
+  UserDao userDao = UserDao();
+
+  int userId = 0;
+
+  bool isAgree = false;
+
+  AddressDao addressDao = AddressDao();
+
+  Future<String?> getData(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString(key);
+
+    if (token != null && token.isNotEmpty) {
+      print('Token: $token');
+      return token;
+    } else {
+      print('Token is null or empty');
+      return null;
+    }
+  }
+
+  Future<void> foundUser(String key) async {
+    String? username = await getData(key); // Sử dụng await để lấy giá trị
+    if (username != null) {
+      User? user = await userDao.findAnUser(username);
+      if (user != null) {
+        setState(() {
+          userId = user.id;
+        });
+      } else {
+        print('User not found');
+      }
+    } else {
+      print('Username is null');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    foundUser('userToken'); // Truyền key trực tiếp
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +101,7 @@ class AddAddressScreen extends StatelessWidget {
                             color: Colors.black),
                       ),
                       TextField(
+                        controller: _nameController,
                         decoration: InputDecoration(
                           hintText: 'Type your name',
                           border: OutlineInputBorder(
@@ -65,11 +128,13 @@ class AddAddressScreen extends StatelessWidget {
                                 ),
                                 SizedBox(height: 5),
                                 TextField(
+                                  controller: _countryController,
                                   decoration: InputDecoration(
                                     hintText: 'India',
                                     border: OutlineInputBorder(
                                         borderSide: BorderSide.none,
-                                        borderRadius: BorderRadius.circular(10)),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
                                     filled: true, // Kích hoạt nền
                                     fillColor: Color(0xffF5F6FA),
                                   ),
@@ -91,11 +156,13 @@ class AddAddressScreen extends StatelessWidget {
                                 ),
                                 SizedBox(height: 5),
                                 TextField(
+                                  controller: _cityController,
                                   decoration: InputDecoration(
                                     hintText: 'Mumbai',
                                     border: OutlineInputBorder(
                                         borderSide: BorderSide.none,
-                                        borderRadius: BorderRadius.circular(10)),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
                                     filled: true, // Kích hoạt nền
                                     fillColor: Color(0xffF5F6FA),
                                   ),
@@ -113,6 +180,8 @@ class AddAddressScreen extends StatelessWidget {
                             color: Colors.black),
                       ),
                       TextField(
+                        controller: _phoneNumberController,
+                        keyboardType: TextInputType.numberWithOptions(),
                         decoration: InputDecoration(
                           hintText: '+91 8014537533',
                           border: OutlineInputBorder(
@@ -130,6 +199,7 @@ class AddAddressScreen extends StatelessWidget {
                             color: Colors.black),
                       ),
                       TextField(
+                        controller: _addressController,
                         decoration: InputDecoration(
                           hintText: 'Taj Hotel ',
                           border: OutlineInputBorder(
@@ -147,16 +217,38 @@ class AddAddressScreen extends StatelessWidget {
                             style: TextStyle(
                                 fontWeight: FontWeight.w500, fontSize: 16),
                           ),
-                          Switch(value: false, onChanged: (value) {})
+                          Switch(
+                              value: isAgree,
+                              onChanged: (value) {
+                                setState(() {
+                                  isAgree = value;
+                                });
+                              })
                         ],
                       )
                     ],
                   ),
                 ),
-            
+
                 //code here
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      Address address = Address(
+                          id: 0,
+                          userId: userId,
+                          name: _nameController.text,
+                          country: _countryController.text,
+                          city: _cityController.text,
+                          phoneNumber: _phoneNumberController.text,
+                          address: _addressController.text);
+
+                      bool isSucess = await addressDao.insertAddress(address);
+                      if (isSucess) {
+                        Navigator.pop(context);
+                      } else {
+                        showMessage(context, 'Add address not sucessfully');
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                         fixedSize: Size(size.width * 0.9, 48),
                         backgroundColor: Color(0xff4A4E69),
