@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:shop_zen/data/dao/cart_dao.dart';
 import 'package:shop_zen/data/dao/product_dao.dart';
@@ -7,6 +5,7 @@ import 'package:shop_zen/data/models/cart.dart';
 import 'package:shop_zen/data/models/product.dart';
 import 'package:shop_zen/screens/payment_screen.dart';
 import 'package:shop_zen/screens/widget/cart_item_widget.dart';
+import 'package:shop_zen/screens/widget/empty_list_widget.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -26,28 +25,28 @@ class _CartScreenState extends State<CartScreen> {
     List<Cart> list = await cartDao.getAllListData();
     setState(() {
       listCart = list;
-      _checked = List.generate(list.length, (index) => false); // Khởi tạo danh sách checkbox
+      _checked = List.generate(list.length, (index) => false);
     });
-    totalPrices(); // Gọi hàm tính tổng giá trị
+    totalPrices();
   }
 
   Future<void> totalPrices() async {
-    double total = 0; // Khởi tạo biến tổng giá trị
+    double total = 0;
     for (var c in listCart) {
       Product? product = await productDao.getAnProduct(c.productId);
       if (product != null) {
-        total += product.price; // Cộng dồn giá trị sản phẩm vào tổng
+        total += product.price;
       }
     }
     setState(() {
-      totalPrice = total; // Cập nhật tổng giá trị vào totalPrice
+      totalPrice = total;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    loadData(); // Gọi hàm loadData
+    loadData();
   }
 
   @override
@@ -66,26 +65,32 @@ class _CartScreenState extends State<CartScreen> {
         padding: EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
           children: [
-            SizedBox(
-              width: double.infinity,
-              height: size.height * 0.71,
-              child: ListView.builder(
-                itemCount: listCart.length,
-                itemBuilder: (context, index) {
-                  Cart cart = listCart[index];
-                  return CartItemWidget(
-                    cart: listCart[index],
-                    isChecked: _checked[index],
-                    onCheckedChanged: (value) {
-                      setState(() {
-                        _checked[index] = value!;
-                      });
-                    },
-                    loadData: loadData,
-                  );
-                },
-              ),
-            ),
+            listCart.length == 0
+                ? SizedBox(
+                    width: double.infinity,
+                    height: size.height * 0.71,
+                    child: EmptyListWidget(message: 'Cart',),
+                  )
+                : SizedBox(
+                    width: double.infinity,
+                    height: size.height * 0.71,
+                    child: ListView.builder(
+                      itemCount: listCart.length,
+                      itemBuilder: (context, index) {
+                        Cart cart = listCart[index];
+                        return CartItemWidget(
+                          cart: listCart[index],
+                          isChecked: _checked[index],
+                          onCheckedChanged: (value) {
+                            setState(() {
+                              _checked[index] = value!;
+                            });
+                          },
+                          loadData: loadData,
+                        );
+                      },
+                    ),
+                  ),
             Container(
               padding: EdgeInsets.all(10),
               width: size.width,
@@ -119,7 +124,10 @@ class _CartScreenState extends State<CartScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               )),
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PaymentScreen()));
                           },
                           child: Text('Check out now'))
                     ],

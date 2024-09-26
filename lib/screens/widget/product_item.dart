@@ -84,9 +84,15 @@ class _ProductItemState extends State<ProductItem> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(15),
-                      child: Image.network(
-                        widget.product.imageUrl,
+                      child: FadeInImage(
+                        placeholder:
+                            AssetImage('assets/images/loading_icon.png'),
+                        image: NetworkImage(widget.product.imageUrl ?? ''),
                         fit: BoxFit.contain,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          return Image.asset('assets/images/loading_icon.png',
+                              fit: BoxFit.contain);
+                        },
                       ),
                     ),
                     Positioned(
@@ -104,8 +110,10 @@ class _ProductItemState extends State<ProductItem> {
                               bool isSucess =
                                   await favoriteDao.insertFavorite(favorite);
                               isSucess
-                                  ? showMessage(context, 'Add favorite sucessfully')
-                                  : showMessage(context, 'Add favorite not sucessfully');
+                                  ? showMessage(
+                                      context, 'Add favorite sucessfully')
+                                  : showMessage(
+                                      context, 'Add favorite not sucessfully');
                             } else {
                               showMessage(context, 'Record already exists');
                             }
@@ -118,6 +126,7 @@ class _ProductItemState extends State<ProductItem> {
             Expanded(
               flex: 25,
               child: Container(
+                width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

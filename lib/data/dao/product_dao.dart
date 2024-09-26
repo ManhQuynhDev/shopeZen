@@ -61,12 +61,52 @@ class ProductDao {
     }).toList();
     return products;
   }
+
+  Future<List<Product>> getFindProductByCategoryId(int category_id) async {
+    final db = await dbHelper.initDb();
+    final List<Map<String, dynamic>> result = await db
+        .rawQuery('SELECT * FROM Products WHERE categoryId = ?', [category_id]);
+
+    List<Product> products = result.map((p) {
+      return Product(
+        id: p['id'],
+        name: p['name'],
+        price: p['price'],
+        imageUrl: p['imageUrl'],
+        description: p['description'],
+        categoryId: p['categoryId'],
+      );
+    }).toList();
+    return products;
+  }
+
+  Future<List<Product>> loadMore(
+      {required int page_size, required int page_number}) async {
+    final db = await dbHelper.initDb();
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+        SELECT * FROM Products
+        LIMIT ? OFFSET ?;
+      ''', [page_size, (page_number - 1) * page_size]);
+
+    List<Product> products = result.map((p) {
+      return Product(
+        id: p['id'],
+        name: p['name'],
+        price: p['price'],
+        imageUrl: p['imageUrl'],
+        description: p['description'],
+        categoryId: p['categoryId'],
+      );
+    }).toList();
+    return products;
+  }
+
   Future<Product?> getAnProduct(int productId) async {
     final db = await dbHelper.initDb();
     final List<Map<String, dynamic>> result =
-        await db.rawQuery('SELECT * FROM Products where id = ?',[productId]);
+        await db.rawQuery('SELECT * FROM Products where id = ?', [productId]);
 
-    if(result.isNotEmpty){
+    if (result.isNotEmpty) {
       final p = result.first;
       return Product(
         id: p['id'],
@@ -76,7 +116,7 @@ class ProductDao {
         description: p['description'],
         categoryId: p['categoryId'],
       );
-    }else{
+    } else {
       return null;
     }
   }

@@ -3,6 +3,9 @@ import 'package:shop_zen/data/dao/review_dao.dart';
 import 'package:shop_zen/data/dao/user_dao.dart';
 import 'package:shop_zen/data/models/review.dart';
 import 'package:shop_zen/data/models/user.dart';
+import 'package:shop_zen/main.dart';
+import 'package:shop_zen/screens/details_screen.dart';
+import 'package:shop_zen/screens/home_screen.dart';
 import 'package:shop_zen/screens/widget/show_message_widget.dart';
 
 class AddReviewsScreen extends StatefulWidget {
@@ -176,25 +179,23 @@ class _AddReviewsScreenState extends State<AddReviewsScreen> {
                     String name = _titleController.text;
                     String content = _contentController.text;
 
-                    // Kiểm tra nếu tên rỗng
                     if (name.isEmpty) {
                       setState(() {
-                        _isErrorTitle = true; // Hiển thị lỗi cho tên
+                        _isErrorTitle = true;
                       });
                     } else {
                       setState(() {
-                        _isErrorTitle = false; // Không có lỗi cho tên
+                        _isErrorTitle = false;
                       });
                     }
 
-                    // Kiểm tra nếu nội dung rỗng
                     if (content.isEmpty) {
                       setState(() {
-                        _isErrorContent = true; // Hiển thị lỗi cho nội dung
+                        _isErrorContent = true;
                       });
                     } else {
                       setState(() {
-                        _isErrorContent = false; // Không có lỗi cho nội dung
+                        _isErrorContent = false;
                       });
                     }
 
@@ -216,6 +217,7 @@ class _AddReviewsScreenState extends State<AddReviewsScreen> {
                         _titleController.text = '';
                         _isCheck = false;
                         showMessage(context, 'Add reviews successfully');
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => NavigatorApp()));
                       } else {
                         showMessage(context, 'Add reviews not successfully');
                       }

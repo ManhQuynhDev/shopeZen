@@ -90,7 +90,7 @@ class DbHelper {
             FOREIGN KEY (userId) REFERENCES Users(id)
         )''');
 
-         await db.execute('''CREATE TABLE Orders(
+        await db.execute('''CREATE TABLE Orders(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             userId INTEGER NOT NULL,
             orderItemId INTEGER NOT NULL,
@@ -103,8 +103,7 @@ class DbHelper {
             FOREIGN KEY (addressId) REFERENCES Address(id)
         )''');
 
-
-         await db.execute('''CREATE TABLE OrderItem(
+        await db.execute('''CREATE TABLE OrderItem(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             productId INTEGER NOT NULL,
             userId INTEGER NOT NULL,
@@ -113,7 +112,6 @@ class DbHelper {
             FOREIGN KEY (productId) REFERENCES Products(id),
             FOREIGN KEY (userId) REFERENCES Users(id)
         )''');
-        
 
         await db.insert('Users', {
           'username': 'admin',
@@ -172,9 +170,98 @@ class DbHelper {
           'categoryId': 2,
         });
 
+        await db.insert('Products', {
+          'name': 'Giày sport Adidas',
+          'imageUrl':
+              'https://bizweb.dktcdn.net/thumb/1024x1024/100/336/177/products/1-18.jpg?v=1716367478560',
+          'price': 200.00,
+          'description': 'Classic Adidas shoes with a timeless design.',
+          'categoryId': 2,
+        });
+
+        await db.insert('Products', {
+          'name': 'Áo khoác đồng phục AK123456',
+          'imageUrl':
+              'https://htmediagroup.vn/wp-content/uploads/2021/12/Ao-thun-11-min.jpg',
+          'price': 120.00,
+          'description': 'Đồng phục cao cấp chất liệu thoáng mát.',
+          'categoryId': 1,
+        });
+
+        await db.insert('Products', {
+          'name': 'Mũ len mùa đông',
+          'imageUrl':
+              'https://pos.nvncdn.com/cba2a3-7534/ps/20220414_E4OH2i6ERdQ1o4BDifAZtkMw.JPG',
+          'price': 50.00,
+          'description': 'Mũ len thời trang cho mùa đông.',
+          'categoryId': 3,
+        });
+
+        await db.insert('Products', {
+          'name': 'Áo thun nam Nike',
+          'imageUrl':
+              'https://s.alicdn.com/@sc04/kf/HTB1eyzQajDuK1RjSszdq6xGLpXaQ.jpg_720x720q50.jpg',
+          'price': 180.00,
+          'description': 'Áo thun Nike, phong cách thể thao.',
+          'categoryId': 2,
+        });
+
+        await db.insert('Products', {
+          'name': 'Quần thể thao Puma',
+          'imageUrl':
+              'https://antien.vn/files/styles/pslide/public/products/photos/2024/06/10/quan-ngan-the-thao-nike-CZ9063-010-1.png?itok=IHPoLm8r',
+          'price': 160.00,
+          'description': 'Quần thể thao Puma với chất liệu thoáng khí.',
+          'categoryId': 2,
+        });
+
+        await db.insert('Products', {
+          'name': 'Áo khoác mùa đông nam',
+          'imageUrl':
+              'https://thoitrangsi.vn/wp-content/uploads/2024/07/TS218D.jpg',
+          'price': 220.00,
+          'description': 'Áo khoác mùa đông với lớp lót giữ nhiệt tốt.',
+          'categoryId': 1,
+        });
+
+        await db.insert('Products', {
+          'name': 'Giày Nike Air Max',
+          'imageUrl':
+              'https://product.hstatic.net/200000278317/product/thanh-hung-futsal-giay-da-bong-zocker-inspire-pro-tf-sns-005-cam-1_79196b0691854a9b93e60369e8905201_master.jpg',
+          'price': 250.00,
+          'description': 'Giày Nike Air Max với thiết kế năng động.',
+          'categoryId': 2,
+        });
+
+        await db.insert('Products', {
+          'name': 'Áo khoác chống nắng Uniqlo',
+          'imageUrl': 'https://thoitrangsi.vn/wp-content/uploads/2024/07/TS218R.jpg',
+          'price': 130.00,
+          'description': 'Áo khoác chống nắng thoáng mát từ Uniqlo.',
+          'categoryId': 1,
+        });
+
+        await db.insert('Products', {
+          'name': 'Mũ lưỡi trai thể thao',
+          'imageUrl':
+              'https://www.ketnoitieudung.vn/data/bt7/non-luoi-trai-makita-1708309830.png',
+          'price': 40.00,
+          'description': 'Mũ lưỡi trai thể thao cho nam nữ.',
+          'categoryId': 3,
+        });
+
+        await db.insert('Products', {
+          'name': 'Balo du lịch thể thao',
+          'imageUrl':
+              'https://bitex.com.vn/vnt_upload/news/08_2019/xBalo-mau-giao-hinh-thu-de-thuong-cho-cac-be-mam-non-02.jpg.pagespeed.ic.mx92kQjBXN.jpg',
+          'price': 300.00,
+          'description': 'Balo thể thao tiện lợi, chống thấm nước.',
+          'categoryId': 3,
+        });
+
         await db.insert('Address', {
           'name': 'wonderful quynh',
-          'userId' : 1,
+          'userId': 1,
           'country': 'vietnamese',
           'city': 'ha noi',
           'phoneNumber': '0869865871',

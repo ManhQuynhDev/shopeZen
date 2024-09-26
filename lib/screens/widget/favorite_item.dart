@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:shop_zen/data/dao/favorite_dao.dart';
 import 'package:shop_zen/data/dao/product_dao.dart';
 import 'package:shop_zen/data/models/favorite.dart';
 import 'package:shop_zen/data/models/product.dart';
+import 'package:shop_zen/screens/widget/show_message_widget.dart';
 
 class FavoriteItem extends StatefulWidget {
   final Favorite favorite;
-  const FavoriteItem({super.key, required this.favorite});
+  final Function loadData;
+  const FavoriteItem(
+      {super.key, required this.favorite, required this.loadData});
 
   @override
   State<FavoriteItem> createState() => _FavoriteItemState();
@@ -13,6 +17,7 @@ class FavoriteItem extends StatefulWidget {
 
 class _FavoriteItemState extends State<FavoriteItem> {
   ProductDao productDao = ProductDao();
+  FavoriteDao favoriteDao = FavoriteDao();
   Product? product;
 
   Future<void> getAnProduct(int productId) async {
@@ -43,15 +48,13 @@ class _FavoriteItemState extends State<FavoriteItem> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: FadeInImage(
-                      placeholder: AssetImage(
-                          'assets/images/loading_icon.png'), // Sử dụng AssetImage cho hình ảnh tạm thời
-                      image: NetworkImage(product?.imageUrl ??
-                          ''), // Sử dụng NetworkImage cho ảnh từ mạng
+                      placeholder: AssetImage('assets/images/loading_icon.png'),
+                      image: NetworkImage(product?.imageUrl ?? ''),
                       fit: BoxFit.contain,
                       imageErrorBuilder: (context, error, stackTrace) {
                         return Image.asset('assets/images/loading_icon.png',
                             fit: BoxFit
-                                .contain); // Hiển thị ảnh tạm nếu tải ảnh từ mạng thất bại
+                                .contain);
                       },
                     ),
                   ),
@@ -59,7 +62,36 @@ class _FavoriteItemState extends State<FavoriteItem> {
                       right: 0,
                       top: 0,
                       child: IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Confirm'),
+                                  content:
+                                      Text('Do you want to delele this item ?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        bool isCheck = await favoriteDao
+                                            .deleteFavorite(widget.favorite.id);
+                                        if (isCheck) {
+                                          Navigator.pop(context);
+                                          widget.loadData();
+                                        }
+                                      },
+                                      child: const Text('Ok'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
                         icon: Icon(Icons.delete),
                         color: Colors.red,
                       ))

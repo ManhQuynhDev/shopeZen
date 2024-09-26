@@ -74,7 +74,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: Center(
-            child: Text('Address',
+            child: Text('Add Address',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           ),
         ),
@@ -103,7 +103,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                       TextField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          hintText: 'Type your name',
+                          hintText: 'your name',
                           border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10)),
@@ -130,7 +130,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                 TextField(
                                   controller: _countryController,
                                   decoration: InputDecoration(
-                                    hintText: 'India',
+                                    hintText: 'your country',
                                     border: OutlineInputBorder(
                                         borderSide: BorderSide.none,
                                         borderRadius:
@@ -158,7 +158,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                                 TextField(
                                   controller: _cityController,
                                   decoration: InputDecoration(
-                                    hintText: 'Mumbai',
+                                    hintText: 'your city',
                                     border: OutlineInputBorder(
                                         borderSide: BorderSide.none,
                                         borderRadius:
@@ -183,7 +183,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                         controller: _phoneNumberController,
                         keyboardType: TextInputType.numberWithOptions(),
                         decoration: InputDecoration(
-                          hintText: '+91 8014537533',
+                          hintText: 'your phone',
                           border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10)),
@@ -201,7 +201,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                       TextField(
                         controller: _addressController,
                         decoration: InputDecoration(
-                          hintText: 'Taj Hotel ',
+                          hintText: 'your address ',
                           border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius: BorderRadius.circular(10)),

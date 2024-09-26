@@ -12,6 +12,7 @@ import 'package:shop_zen/screens/favorite_screen.dart';
 import 'package:shop_zen/screens/finish_screen.dart';
 import 'package:shop_zen/screens/home_screen.dart';
 import 'package:shop_zen/screens/login_screen.dart';
+import 'package:shop_zen/screens/product_by_id_screen.dart';
 import 'package:shop_zen/screens/reviews_screen.dart';
 import 'package:shop_zen/screens/sign_up_screen.dart';
 import 'package:shop_zen/screens/welcome_screen.dart';

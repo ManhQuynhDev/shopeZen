@@ -78,7 +78,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   late ProductSize choose;
 
   @override
-  void initState() {
+  void initState() {  
     super.initState();
     foundSize();
     foundCategory();

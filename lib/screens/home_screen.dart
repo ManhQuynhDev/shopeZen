@@ -3,6 +3,7 @@ import 'package:shop_zen/data/dao/category_dao.dart';
 import 'package:shop_zen/data/dao/product_dao.dart';
 import 'package:shop_zen/data/models/category.dart';
 import 'package:shop_zen/data/models/product.dart';
+import 'package:shop_zen/screens/cart_screen.dart';
 import 'package:shop_zen/screens/details_screen.dart';
 import 'package:shop_zen/screens/widget/category_item.dart';
 import 'package:shop_zen/screens/widget/product_item.dart';
@@ -17,32 +18,89 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   CategoryDao categoryDao = CategoryDao();
   ProductDao productDao = ProductDao();
-
+  List<Product> listAllProduct = [];
   List<Product> listProduct = [];
-
+  List<Product> listSearchProduct = [];
   List<Category> listCategory = [];
+  TextEditingController _searchController = TextEditingController();
+
+  int page_number = 1;
+  int page_size = 4;
+  bool isLoading = false;
+  bool isSearch = false;
+
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+    loadDataProduct();
+    loadDataProduct();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !isLoading) {
+        loadMoreProducts();
+      }
+    });
+    _searchController.addListener(() {
+      if (_searchController.text == '') {
+        setState(() {
+          isSearch = false;
+          listSearchProduct.clear();
+        });
+      } else {
+        setState(() {
+          isSearch = true;
+          listSearchProduct = listAllProduct
+              .where((product) => product.name
+                  .toLowerCase()
+                  .contains(_searchController.text.toLowerCase()))
+              .toList();
+        });
+      }
+    });
+  }
 
   Future<void> loadData() async {
-    // Tải dữ liệu từ cơ sở dữ liệu và cập nhật trạng thái
     List<Category> list = await categoryDao.getAllListData();
     setState(() {
       listCategory = list;
     });
   }
 
-  Future<void> loadDataProduct() async {
-    // Tải dữ liệu từ cơ sở dữ liệu và cập nhật trạng thái
+  Future<void> loadProductData() async {
     List<Product> list = await productDao.getAllListData();
     setState(() {
-      listProduct = list;
+      listAllProduct = list;
     });
   }
 
-  @override
-  void initState() {
-    loadData();
+  Future<void> loadDataProduct() async {
+    setState(() {
+      isLoading = true;
+    });
+    List<Product> list = await productDao.loadMore(
+        page_number: page_number, page_size: page_size);
+    setState(() {
+      listProduct.addAll(list);
+      isLoading = false;
+    });
+  }
+
+  void loadMoreProducts() {
+    setState(() {
+      page_number++;
+    });
     loadDataProduct();
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,14 +113,21 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.white,
           leading: Icon(Icons.menu),
           actions: [
-            Container(
-                margin: EdgeInsets.only(right: 10),
-                width: 35,
-                height: 35,
-                decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.2),
-                    shape: BoxShape.circle),
-                child: Icon(Icons.shopping_bag)),
+            InkWell(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CartScreen(),
+                  )),
+              child: Container(
+                  margin: EdgeInsets.only(right: 10),
+                  width: 35,
+                  height: 35,
+                  decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.2),
+                      shape: BoxShape.circle),
+                  child: Icon(Icons.shopping_bag)),
+            ),
           ],
         ),
         body: SingleChildScrollView(
@@ -70,25 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     Container(
-              //         width: 45,
-              //         height: 45,
-              //         decoration: BoxDecoration(
-              //             shape: BoxShape.circle,
-              //             color: Colors.grey.withOpacity(0.2)),
-              //         child: Image.asset('assets/images/icon_menu.png')),
-              //     Container(
-              //         width: 45,
-              //         height: 45,
-              //         decoration: BoxDecoration(
-              //             shape: BoxShape.circle,
-              //             color: Colors.grey.withOpacity(0.2)),
-              //         child: Image.asset('assets/images/icon_bag.png'))
-              //   ],
-              // ),
               SizedBox(
                 width: size.width * 0.3,
                 child: RichText(
@@ -116,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: size.width * 0.75,
                     child: TextField(
+                      controller: _searchController,
                       decoration: InputDecoration(
                           prefixIcon: Icon(Icons.search),
                           labelText: 'Search',
@@ -133,9 +180,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Color(0xff4A4E69),
                         ),
                         child: Center(
-                            child: Icon(
-                          Icons.mic,
-                          color: Colors.white,
+                            child: IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.search,
+                            color: Colors.white,
+                          ),
                         ))),
                   )
                 ],
@@ -185,19 +235,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: 20),
               SizedBox(
-                  width: double.infinity,
-                  height: size.height * 0.4,
-                  child: GridView.builder(
-                    itemCount: listProduct.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: size.width > 500 ? 3 : 2,
-                        crossAxisSpacing: 15.0,
-                        childAspectRatio: 0.8 / 1.3),
-                    itemBuilder: (BuildContext context, int index) {
-                      Product product = listProduct[index];
-                      return ProductItem(product: product);
-                    },
-                  )),
+                width: double.infinity,
+                height: size.height * 0.4,
+                child: GridView.builder(
+                  controller: isSearch
+                      ? null
+                      : _scrollController, // Đặt controller để cuộn
+                  itemCount:
+                      isSearch ? listSearchProduct.length : listProduct.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: size.width > 500 ? 3 : 2,
+                      crossAxisSpacing: 15.0,
+                      childAspectRatio: 0.8 / 1.3),
+                  itemBuilder: (BuildContext context, int index) {
+                    Product product = listProduct[index];
+                    return ProductItem(product: product);
+                  },
+                ),
+              ),
+              if (isLoading)
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
             ],
           ),
         ),

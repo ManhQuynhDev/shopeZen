@@ -30,8 +30,48 @@ class _SignUpState extends State<LoginScreen> {
     await prefs.setString(key, value);
   }
 
+  Future<void> rememberAccount(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+  }
+
+  Future<void> rememberStatus(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  Future<void> removeAccount(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
+  Future<void> getAccount(key1, key2, key3) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? username = await prefs.getString(key1);
+    String? password = await prefs.getString(key2);
+    bool? remember = await prefs.getBool(key3);
+    if (username != null && password != null && remember != null) {
+      setState(() {
+        _usernameController.text = username;
+        _passwordController.text = password;
+        _isRemember = remember;
+      });
+    } else {
+      _usernameController.text = '';
+      _passwordController.text = '';
+      _isRemember = false;
+    }
+  }
+
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    getAccount('username', 'password', 'remember');
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -151,7 +191,7 @@ class _SignUpState extends State<LoginScreen> {
                               value: _isRemember,
                               onChanged: (value) {
                                 setState(() {
-                                  _isRemember = !_isRemember;
+                                  _isRemember = value;
                                 });
                               })
                         ],
@@ -182,6 +222,15 @@ class _SignUpState extends State<LoginScreen> {
                       if (isLoginSucess) {
                         // showMessage(context, 'User login successfully');
                         saveData('userToken', _usernameController.text);
+                        if (_isRemember == true) {
+                          rememberAccount('username', _usernameController.text);
+                          rememberAccount('password', _passwordController.text);
+                          rememberStatus('remember', _isRemember);
+                        } else {
+                          removeAccount('username');
+                          removeAccount('password');
+                          removeAccount('remember');
+                        }
                         Navigator.pushNamed(context, NavigatorApp.HOME_SCREEN);
                       } else {
                         showMessage(context, 'Failed to login user');
